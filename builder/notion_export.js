@@ -2,12 +2,12 @@ const fetch = require("node-fetch");
 const fs = require("fs");
 const https = require("https");
 const AdmZip = require("adm-zip");
-const { cookies } = require("./cookie.js");
+const { cookie } = require("./cookie.js");
 
 let zipName = "export.zip";
 let pageURL =
-  "https://www.notion.so/Hand-Held-Creative-Tools-for-Phones-03187d072d6344eab9a7d065e1f9ae2d"
-  
+  "https://www.notion.so/Hand-Held-Creative-Tools-for-Phones-03187d072d6344eab9a7d065e1f9ae2d";
+
 fetch("https://www.notion.so/api/v3/enqueueTask", {
   headers: {
     accept: "*/*",
@@ -20,15 +20,15 @@ fetch("https://www.notion.so/api/v3/enqueueTask", {
     "sec-fetch-mode": "cors",
     "sec-fetch-site": "same-origin",
     "x-notion-active-user-header": "d9ea804d-bca9-4be1-904d-0c809b81fb50",
-    cookie: cookies
+    cookie: cookie,
   },
   referrer: pageURL,
   referrerPolicy: "same-origin",
-  body: "{\"task\":{\"eventName\":\"exportBlock\",\"request\":{\"blockId\":\"03187d07-2d63-44ea-b9a7-d065e1f9ae2d\",\"recursive\":false,\"exportOptions\":{\"exportType\":\"html\",\"timeZone\":\"America/New_York\",\"locale\":\"en\"}}}}",
+  body: '{"task":{"eventName":"exportBlock","request":{"blockId":"03187d07-2d63-44ea-b9a7-d065e1f9ae2d","recursive":false,"exportOptions":{"exportType":"html","timeZone":"America/New_York","locale":"en"}}}}',
   method: "POST",
-  mode: "cors"
-}).then(response => {
-  response.json().then(data => {
+  mode: "cors",
+}).then((response) => {
+  response.json().then((data) => {
     console.log(data);
     let { taskId } = data;
     getTasks(taskId);
@@ -47,15 +47,15 @@ function getTasks(task_id) {
       "sec-fetch-mode": "cors",
       "sec-fetch-site": "same-origin",
       "x-notion-active-user-header": "d9ea804d-bca9-4be1-904d-0c809b81fb50",
-      cookie: cookies
+      cookie: cookie,
     },
     referrer: pageURL,
     referrerPolicy: "same-origin",
     body: `{"taskIds":["${task_id}"]}`,
     method: "POST",
-    mode: "cors"
-  }).then(response => {
-    response.json().then(data => {
+    mode: "cors",
+  }).then((response) => {
+    response.json().then((data) => {
       let { results } = data;
       console.log(results.length);
 
@@ -78,7 +78,7 @@ function getTasks(task_id) {
 function downloadZip(url, localPath) {
   console.log("downloading zip");
   var file = fs.createWriteStream(localPath);
-  var request = https.get(url, function(response) {
+  var request = https.get(url, function (response) {
     response.pipe(file);
   });
   file.on("finish", () => {
@@ -86,7 +86,7 @@ function downloadZip(url, localPath) {
     console.log("unzipping");
     var zip = new AdmZip("./" + zipName);
 
-    zip.getEntries().forEach(function(entry) {
+    zip.getEntries().forEach(function (entry) {
       var entryName = entry.entryName;
       var decompressedData = zip.readFile(entry); // decompressed buffer of the entry
       console.log(entryName);
