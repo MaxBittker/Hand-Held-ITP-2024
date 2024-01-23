@@ -8,33 +8,33 @@ let zipName = "export.zip";
 let pageURL =
   "https://www.notion.so/Hand-Held-Creative-Tools-for-Phones-03187d072d6344eab9a7d065e1f9ae2d";
 
-fetch("https://www.notion.so/api/v3/enqueueTask", {
-  headers: {
-    accept: "*/*",
-    "accept-language": "en-US,en;q=0.9",
-    "cache-control": "no-cache",
-    "content-type": "application/json",
-    "notion-client-version": "23.13.0.78",
+// fetch("https://www.notion.so/api/v3/enqueueTask", {
+//   headers: {
+//     accept: "*/*",
+//     "accept-language": "en-US,en;q=0.9",
+//     "cache-control": "no-cache",
+//     "content-type": "application/json",
+//     "notion-client-version": "23.13.0.78",
 
-    pragma: "no-cache",
-    "sec-fetch-dest": "empty",
-    "sec-fetch-mode": "cors",
-    "sec-fetch-site": "same-origin",
-    "x-notion-active-user-header": "d9ea804d-bca9-4be1-904d-0c809b81fb50",
-    cookie: cookie,
-  },
-  referrer: pageURL,
-  referrerPolicy: "same-origin",
-  body: '{"task":{"eventName":"exportBlock","request":{"block":{"id":"03187d07-2d63-44ea-b9a7-d065e1f9ae2d","spaceId":"94b22790-65ca-4658-b6e3-9d7c2a04f62c"},"recursive":false,"exportOptions":{"exportType":"html","timeZone":"America/New_York","locale":"en","collectionViewExportType":"currentView","preferredViewMap":{"17af138b-486b-474d-bae5-3cfe879018a7":"526897ce-6f3e-4600-a131-fcb57284d69b"}},"shouldExportComments":false}}}',
-  method: "POST",
-  mode: "cors",
-}).then((response) => {
-  response.json().then((data) => {
-    console.log(data);
-    let { taskId } = data;
-    getTasks(taskId);
-  });
-});
+//     pragma: "no-cache",
+//     "sec-fetch-dest": "empty",
+//     "sec-fetch-mode": "cors",
+//     "sec-fetch-site": "same-origin",
+//     "x-notion-active-user-header": "d9ea804d-bca9-4be1-904d-0c809b81fb50",
+//     cookie: cookie,
+//   },
+//   referrer: pageURL,
+//   referrerPolicy: "same-origin",
+//   body: '{"task":{"eventName":"exportBlock","request":{"block":{"id":"03187d07-2d63-44ea-b9a7-d065e1f9ae2d","spaceId":"94b22790-65ca-4658-b6e3-9d7c2a04f62c"},"recursive":false,"exportOptions":{"exportType":"html","timeZone":"America/New_York","locale":"en","collectionViewExportType":"currentView","preferredViewMap":{"17af138b-486b-474d-bae5-3cfe879018a7":"526897ce-6f3e-4600-a131-fcb57284d69b"}},"shouldExportComments":false}}}',
+//   method: "POST",
+//   mode: "cors",
+// }).then((response) => {
+//   response.json().then((data) => {
+//     console.log(data);
+//     let { taskId } = data;
+//     getTasks(taskId);
+//   });
+// });
 
 // fetch("https://www.notion.so/api/v3/enqueueTask", {
 //   headers: {
@@ -117,20 +117,24 @@ function downloadZip(url, localPath) {
   );
   file.on("finish", () => {
     file.close();
-    console.log("unzipping");
-    var zip = new AdmZip("./" + zipName);
+    buildFromZip();
+  });
+}
+function buildFromZip() {
+  console.log("unzipping");
+  var zip = new AdmZip("./" + zipName);
 
-    zip.getEntries().forEach(function (entry) {
-      var entryName = entry.entryName;
-      var decompressedData = zip.readFile(entry); // decompressed buffer of the entry
-      console.log(entryName);
-      if (entryName.endsWith(".html") && entryName != "index.html") {
-        let currentHTML = zip.readAsText(entry);
-        const charset = `<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>`;
-        const viewportMeta = `<meta name="viewport" content="width=device-width, initial-scale=1">`;
-        let fontTag = `<link href="//fonts.googleapis.com/css?family=Merriweather&subset=latin" rel="stylesheet" type="text/css">`;
+  zip.getEntries().forEach(function (entry) {
+    var entryName = entry.entryName;
+    var decompressedData = zip.readFile(entry); // decompressed buffer of the entry
+    console.log(entryName);
+    if (entryName.endsWith(".html") && entryName != "index.html") {
+      let currentHTML = zip.readAsText(entry);
+      const charset = `<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>`;
+      const viewportMeta = `<meta name="viewport" content="width=device-width, initial-scale=1">`;
+      let fontTag = `<link href="//fonts.googleapis.com/css?family=Merriweather&subset=latin" rel="stylesheet" type="text/css">`;
 
-        const style = `
+      const style = `
         <style>
         body{
           padding: 1em !important;
@@ -142,13 +146,14 @@ function downloadZip(url, localPath) {
         font-family: 'Merriweather', sans-serif;
         }
         </style>`;
-        let payload = charset + viewportMeta + fontTag + style;
-        let newHTML = currentHTML.replace(charset, payload);
-        // zip.updateFile(entry, newHTML);
-        zip.deleteFile(entry);
-        zip.addFile("index.html", newHTML);
-      }
-    });
-    zip.extractAllTo("../", /*overwrite*/ true);
+      let payload = charset + viewportMeta + fontTag + style;
+      let newHTML = currentHTML.replace(charset, payload);
+      // zip.updateFile(entry, newHTML);
+      zip.deleteFile(entry);
+      zip.addFile("index.html", newHTML);
+    }
   });
+  zip.extractAllTo("../", /*overwrite*/ true);
 }
+
+buildFromZip();
