@@ -92,6 +92,7 @@ function getTasks(task_id) {
         if (state == "in_progress") {
           getTasks(task_id);
         } else {
+          console.log(status);
           console.log(status.exportURL);
           downloadZip(status.exportURL, zipName);
         }
