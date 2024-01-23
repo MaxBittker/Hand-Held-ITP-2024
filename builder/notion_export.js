@@ -103,9 +103,17 @@ function getTasks(task_id) {
 function downloadZip(url, localPath) {
   console.log("downloading zip");
   var file = fs.createWriteStream(localPath);
-  var request = https.get(url, function (response) {
-    response.pipe(file);
-  });
+  var request = https.get(
+    url,
+    {
+      headers: {
+        Cookie: cookie,
+      },
+    },
+    function (response) {
+      response.pipe(file);
+    }
+  );
   file.on("finish", () => {
     file.close();
     console.log("unzipping");
